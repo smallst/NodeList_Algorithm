@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <cstring>
 #include <algorithm>
-#include "../include/pcc_tree.h"
+#include "../include/ppc_tree.h"
 
 struct dictionary
 {
