@@ -3,6 +3,9 @@ struct pair
     int pre, post;
 public:
     pair():pre(0),post(0) {}
+    bool operator==(pair& b){
+        return pre==b.pre && post == b.post;
+    }
 };
 struct PP_code
 {
@@ -10,6 +13,7 @@ struct PP_code
     int count;
 public:
     PP_code():count(0){}
+    PP_code(int c):count(c){}
 };
 class PPC_tree
 {
@@ -30,8 +34,8 @@ public:
         }
     }
     ~PPC_tree();
-    void buildTree(const char* fileName, int freqdict[]);
+    void buildTree(const char* fileName,double thresh, int freqdict[]);
     void printTree();
     void traverseWithMark(int &pre, int &post);
-    void buildList(int length, int freqdict[]);
+    void buildList(PP_code *nlist);
 };
