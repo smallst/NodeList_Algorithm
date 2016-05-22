@@ -34,8 +34,9 @@ public:
         }
     }
     ~PPC_tree();
-    void buildTree(const char* fileName,double thresh, int freqdict[]);
+    void buildTree(const char* fileName,double thresh);
     void printTree();
     void traverseWithMark(int &pre, int &post);
     void buildList(PP_code *nlist);
+    void deleteTree();
 };
