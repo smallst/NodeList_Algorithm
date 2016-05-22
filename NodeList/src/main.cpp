@@ -4,8 +4,8 @@
 #include <algorithm>
 #include "../include/ppc_tree.h"
 
-const int LISTSIZE = 800;
-const int ORIGSIZE = 2100;
+const int LISTSIZE = 2800;
+const int ORIGSIZE = 800100;
 const int CODESIZE = 1;//sizeof(PP_code);
 int threshold = 0; 
 bool LLOG = false;
@@ -229,13 +229,61 @@ void DataMining(PP_code *nlist, long addrdict[], int begin, int end){
         for (int j = begin ; j < i; j++) {
             dest = mergeNList(nlist, addrdict[j], addrdict[i], dest, addrdict);
         }
+        /*
         if(nlist[addrdict[i]].count == 2){
             int n = dest - end;
             totalcount += (1<<n) -n - 1;
         }
-        else
+        else*/
             DataMining(nlist, addrdict, end, dest);
     }
+}
+void Mining(PP_code *nlist, long addrdict[], int bbegin, int eend){
+    int begin = bbegin, end = eend;
+    int *mystack = new int [eend - bbegin+2];
+    int len = 1;
+    mystack[0] = begin;
+    for (int i = eend - 1; i > bbegin ; i --) {
+        mystack[len ++] = end;
+        while(len > 1){
+            
+            int jb = begin, je = end -1;
+            int dest  =end;
+            while (je - jb > 0) {
+                for (int j = jb; j < je; j ++) {
+                    dest = mergeNList(nlist, addrdict[j], addrdict[je], dest, addrdict);
+                }
+            /*
+            if(nlist[addrdict[je]].count == 2){
+                int n = dest - end;
+                totalcount += (1<<n) - n - 1;
+
+                jb = end;
+                je = 
+                }*/
+            // else
+                {
+                    begin = end;
+                    end = dest;
+                    jb = begin;
+                    je = end -1;
+                    mystack[len ++] =end;
+                }
+            }
+            len --;
+            if(mystack[len-1] - mystack[len-2] > 1){
+                begin = mystack[len-2];
+                end = -- mystack[len-1];
+            }
+            else if(--len > 1){
+                begin = mystack[len -2];
+                end = mystack[len-1];
+            }
+//        begin = bbegin, end = eend;
+        }
+    }
+    delete[] mystack;
+    
 }
 void printNode_List(PP_code *list, int i){
     int index = i;
@@ -249,9 +297,10 @@ void printNode_List(PP_code *list, int i){
 int main(int argc, char *argv[])
 {
     PPC_tree *root = new PPC_tree();
-    //double thresh = 0.005;
-    double thresh =0.001 * (argv[1][0]-'0');
-    root->buildTree("../data/T10I4D100K.dat", thresh);
+    double thresh = 0.6;
+    //double thresh =0.001 * (argv[1][0]-'0');
+    
+    root->buildTree("../data/accidents.dat", thresh);
     int listlength = PPC_tree::freqcount * (PPC_tree::freqcount-1) / 2;
     /* 
     PP_code *Node_list = new PP_code[(PPC_tree::freqcount*ORIGSIZE + listlength*LISTSIZE)];
@@ -290,7 +339,7 @@ printf("list build\n");
         for (int j = 0 ; j < i; j++) {
             dest = mergeNList(Node_list, j*ORIGSIZE, i*ORIGSIZE, dest, listaddr);
         }
-        DataMining(Node_list, listaddr, 0, dest);
+        Mining(Node_list, listaddr, 0, dest);
     }
     printf("total:%d\n", totalcount);
     
