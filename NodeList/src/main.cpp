@@ -4,11 +4,11 @@
 #include <algorithm>
 #include "../include/ppc_tree.h"
 
-const int LISTSIZE = sizeof(PP_code)*2200;
-const int ORIGSIZE = sizeof(PP_code)*100200;
-const int CODESIZE = sizeof(PP_code);
+const int LISTSIZE = 800;
+const int ORIGSIZE = 2100;
+const int CODESIZE = 1;//sizeof(PP_code);
 int threshold = 0; 
-bool log = false;
+bool LLOG = false;
 
 struct dictionary
 {
@@ -156,7 +156,7 @@ void PPC_tree::buildList(PP_code *nlist){
         if(child[i] != NULL)
         {
             int index = i * ORIGSIZE;
-            nlist[index + nlist[index].count*CODESIZE] = child[i]->node;
+            nlist[index + nlist[index].count] = child[i]->node;
             nlist[index].count++;
             child[i] -> buildList(nlist);
         }
@@ -171,47 +171,46 @@ void PPC_tree::traverseWithMark(int &pre, int &post){
     node.order.post = post++;
 }
 int totalcount = 0;
-int mergeNList(PP_code *nlist, long begina, long beginb,PP_code *Nlist, int dest, long addrdict[]){
-    long enda = begina + nlist[begina].count * CODESIZE;
-    long endb = beginb + nlist[beginb].count * CODESIZE;
+int mergeNList(PP_code *nlist, long begina, long beginb, int dest, long addrdict[]){
+    long enda = begina + nlist[begina].count ;
+    long endb = beginb + nlist[beginb].count ;
     
-    long j = beginb + CODESIZE;
+    long j = beginb + 1;
     long begind = addrdict[dest];
-    Nlist[begind] = PP_code(1);
-    for (long i = begina+CODESIZE; i < enda; i += CODESIZE) {
+    nlist[begind] = PP_code(1);
+    for (long i = begina+1; i < enda; i ++) {
         while(j < endb){
             if(nlist[i].order.pre < nlist[j].order.pre)
             {
                 if(nlist[i].order.post > nlist[j].order.post)
                 {
-                    
-                    if(Nlist[begind + (Nlist[begind].count-1)*CODESIZE].order == nlist[i].order)
-                        Nlist[begind+ (Nlist[begind].count-1)*CODESIZE].count += nlist[j].count;
+                    if(nlist[begind + (nlist[begind].count-1)].order == nlist[i].order)
+                        nlist[begind+ (nlist[begind].count-1)].count += nlist[j].count;
                     else
                     {
-                        Nlist[begind + Nlist[begind].count*CODESIZE].order = nlist[i].order;
-                        Nlist[begind + Nlist[begind].count*CODESIZE].count = nlist[j].count;
-                        Nlist[begind].count++;
+                        nlist[begind + nlist[begind].count].order = nlist[i].order;
+                        nlist[begind + nlist[begind].count].count = nlist[j].count;
+                        nlist[begind].count++;
                      }
-                    j+= CODESIZE;
+                    j++;
                 }
                 else
                     break;
             }
             else{
-                j+= CODESIZE;
+                j++;
             }
         }
     }
     int count = 0;
-    long endd = begind + Nlist[begind].count * CODESIZE;
-    for (long i = begind+CODESIZE; i < endd; i+= CODESIZE) {
-        count += Nlist[i].count;
+    long endd = begind + nlist[begind].count ;
+    for (long i = begind+1; i < endd; i++) {
+        count += nlist[i].count;
     }
-    if(log){
-        printf("%d",Nlist[begind].count);
+    if(LLOG){
+        printf("%d",nlist[begind].count);
         printf("::::::::::::::::::::%d\n",count);
-        printNode_List(Nlist, begind);
+        printNode_List(nlist, begind);
         printf("===================\n");
     }
     if(count < threshold)
@@ -223,56 +222,12 @@ int mergeNList(PP_code *nlist, long begina, long beginb,PP_code *Nlist, int dest
         return dest+1;
     }
 }
-int mergeNodeList(PP_code *nlist, int begina, int beginb, int dest){
-    int lengtha = nlist[begina*LISTSIZE].count * CODESIZE;
-    int lengthb = nlist[beginb*LISTSIZE].count * CODESIZE;
-    int enda = lengtha + begina*LISTSIZE;
-    int endb = lengthb + beginb*LISTSIZE;
-    int j = beginb*LISTSIZE + CODESIZE;
-    int begind = dest*LISTSIZE;
-    nlist[begind] = PP_code(1);
-    for (int i = begina*LISTSIZE+CODESIZE; i < enda; i += CODESIZE) {
-        while(j < endb){
-            if(nlist[i].order.pre < nlist[j].order.pre)
-            {
-                
-                if( nlist[i].order.post > nlist[j].order.post)
-                {
-                    nlist[begind + nlist[begind].count*CODESIZE] = nlist[j];
-                    nlist[begind].count++;
-                    j+= CODESIZE;
-                }
-                else
-                    break;
-            }
-            else{
-                j+= CODESIZE;
-            }
-        }
-    }
-    int endd = begind + nlist[begind].count * CODESIZE;
-    int count = 0;
-    for (int i = begind+CODESIZE; i < endd; i+= CODESIZE) {
-        count += nlist[i].count;
-    }
-    nlist[begind].order.pre = count;
-    if(count < threshold)
-        return dest;
-    else
-    {
-        totalcount ++;
-        return dest+1;
-    }
-    
-}
 void DataMining(PP_code *nlist, long addrdict[], int begin, int end){
-    
     // NList
     for (int i = end - 1; i > begin; i--) {
         int dest = end;
         for (int j = begin ; j < i; j++) {
-            //   printf("%d%d:\n",j,i) ;
-            dest = mergeNList(nlist, addrdict[j], addrdict[i],nlist, dest, addrdict);
+            dest = mergeNList(nlist, addrdict[j], addrdict[i], dest, addrdict);
         }
         if(nlist[addrdict[i]].count == 2){
             int n = dest - end;
@@ -281,82 +236,65 @@ void DataMining(PP_code *nlist, long addrdict[], int begin, int end){
         else
             DataMining(nlist, addrdict, end, dest);
     }
-    /*
-    //NodeList
-    
-      for (int i = begin; i < end -1 ; i++) {
-        int dest = end;
-        for (int j = i+1; j < end; j++) {
-            dest = mergeNodeList(nlist, i, j,dest);
-        }
-        DataMining(nlist, end, dest);
-      }
-    */
-}
-void DataMiningNorecursion(PP_code *nlist,int length, PP_code *buffer){
-    int begin = 0, end = length;
-    for (int i = length; i > 0; i --) {
-        for (int j = end - 1 ; j > begin; j --) {
-            //int dest = end;
-            for (int k = begin; k < j; k++) {
-                //dest = mergeNList(nlist, k, j, dest);
-            }
-            
-        }
-        
-    }
-    
 }
 void printNode_List(PP_code *list, int i){
     int index = i;
     for (int j = 1; j < list[index].count; j++) {
-        printf("<%d,%d>:%d, ",list[index + j*CODESIZE].order.pre,
-               list[index + j*CODESIZE].order.post,
-               list[index+j*CODESIZE].count);
+        printf("<%d,%d>:%d, ",list[index + j].order.pre,
+               list[index + j].order.post,
+               list[index+j].count);
     }
     printf("\n");
 }
 int main(int argc, char *argv[])
 {
     PPC_tree *root = new PPC_tree();
-    double thresh = 0.005;
+    //double thresh = 0.005;
+    double thresh =0.001 * (argv[1][0]-'0');
     root->buildTree("../data/T10I4D100K.dat", thresh);
     int listlength = PPC_tree::freqcount * (PPC_tree::freqcount-1) / 2;
-    
-    PP_code *Node_list = new PP_code[PPC_tree::freqcount * ORIGSIZE];
+    /* 
+    PP_code *Node_list = new PP_code[(PPC_tree::freqcount*ORIGSIZE + listlength*LISTSIZE)];
     long *listaddr = new long[listlength];
     
     for (int i = 0; i < PPC_tree::freqcount; i++) {
         Node_list[i*ORIGSIZE] = PP_code(1);
     }
     root->buildList(Node_list);
-    root->deleteTree();
+    root->deleteTree();*/
+    	PP_code *Nde_list = new PP_code[PPC_tree::freqcount*ORIGSIZE/CODESIZE];	
+    long *listaddr = new long[listlength];
     
-    PP_code * N_list = new PP_code[listlength * LISTSIZE];
+printf("list build\n");
+    for (long long i = 0; i < PPC_tree::freqcount; i++) {
+        Nde_list[i*ORIGSIZE] = PP_code(1);
+    }
+    root->buildList(Nde_list);
+    root->deleteTree();
+    PP_code *Node_list = new PP_code[PPC_tree::freqcount*ORIGSIZE + listlength*LISTSIZE];
+    memcpy(Node_list, Nde_list, PPC_tree::freqcount*ORIGSIZE*sizeof(PP_code));
+ 
     int mxlen = 0;
     for (int i = 0; i < PPC_tree::freqcount; i++) {
         if(Node_list[i*ORIGSIZE].count > mxlen)
-            mxlen = Node_list[i*ORIGSIZE].count;
-        if(log)
+           mxlen = Node_list[i*ORIGSIZE].count;
+        if(LLOG)
             printNode_List(Node_list,i*ORIGSIZE);
     }
     printf("mxlen=%d\n",mxlen);
     
     totalcount = PPC_tree::freqcount;
-    printf("freqcount:%d\n",PPC_tree::freqcount);
-
-    listaddr[0] = 0;
+    listaddr[0] = PPC_tree::freqcount * ORIGSIZE;
     for (int i = PPC_tree::freqcount - 1; i > 0; i--) {
         int dest = 0;
         for (int j = 0 ; j < i; j++) {
-            dest = mergeNList(Node_list, j*ORIGSIZE, i*ORIGSIZE, N_list, dest, listaddr);
+            dest = mergeNList(Node_list, j*ORIGSIZE, i*ORIGSIZE, dest, listaddr);
         }
-        DataMining(N_list, listaddr, 0, dest);
+        DataMining(Node_list, listaddr, 0, dest);
     }
     printf("total:%d\n", totalcount);
     
-    delete[] N_list;
     delete[] Node_list;
-//    delete[] listaddr;
+    delete[] listaddr;
     return 0;
 }
