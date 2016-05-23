@@ -1,3 +1,5 @@
+#ifndef _PPC_TREE_H_
+#define _PPC_TREE_H_
 struct pair
 {
     int pre, post;
@@ -9,7 +11,9 @@ public:
 };
 struct PP_code
 {
-    pair order;
+    //pair order;
+    int order_pre;
+    int order_post;
     int count;
 public:
     PP_code():count(0){}
@@ -40,3 +44,31 @@ public:
     void buildList(PP_code *nlist);
     void deleteTree();
 };
+
+class PPC_Tree{
+private:
+    PP_code node;
+    
+    int value;
+    PPC_Tree *child, *next, *father;
+public:
+    PPC_Tree(){
+        child = NULL;
+        next = NULL;
+        father = NULL;
+        value = -1;
+    }
+    PPC_Tree(int v){
+        value = v;
+        child  =NULL;
+        next = NULL;
+        father = NULL;
+    }
+    ~PPC_Tree();
+    void buildTree(const char* fileName, double thresh, int freqdict[]);
+    void traverseWithMark();
+    void buildList(PP_code *nlist, int freqdict[]);
+    void printNode();
+    void printTree();
+};
+#endif

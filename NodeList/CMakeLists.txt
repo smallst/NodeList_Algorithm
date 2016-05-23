@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 2.6)
 project(cpp)
 
 set(CMAKE_CXX_COMPILER "g++")
-set(CMAKE_CXX_FLAGS "-fPIC -g -Wall -O4 -std=c++11")
-
+set(CMAKE_CXX_FLAGS "-fPIC -g -Wall -std=c++11")
+set(CMAKE_CXX_FLAGS_RELEASE "-fPIC -Wall -std=c++11 -O3")
 ## if you use opencv,uncomment next line
 # find_package(OpenCV REQUIRED)
 
@@ -19,6 +19,6 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 # link_directories(/usr/local/Aria/lib)
 
 ## replace demo.cpp with your own main.cpp
-add_executable(cpptest src/main.cpp)
+add_executable(cpptest ${SRC_LIST})
 
 # target_link_libraries(robottest Aria pthread dl rt astar ${OpenCV_LIBS})
