@@ -2,12 +2,12 @@
 #define _PPC_TREE_H_
 struct PP_code
 {
-    int order_pre;
-    int order_post;
     int count;
+    int order_pre=0;
+    int order_post=0;
     
-    PP_code():count(0){}
-    PP_code(int c):count(c){}
+    PP_code():count(0),order_pre(0),order_post(0){}
+    PP_code(int c):count(c),order_pre(0),order_post(0){}
 };
 class PPC_Tree{
 private:

@@ -139,7 +139,7 @@ int main(int argc, char *argv[])
 {
     if(argc < 3)
     {
-        printf("usage: datamining filepath threshold\n");
+        printf("usage: %s filepath threshold\n",argv[0]);
         return 0;
     }
 
@@ -148,7 +148,6 @@ int main(int argc, char *argv[])
     
     PPC_Tree *root = new PPC_Tree();
     int freqdict[1000];
-    //root->buildTree("../data/T10I4D100K.dat",0.001,freqdict);
     root->buildTree(filepath, thresh, freqdict);
     
     PP_code *NList = new PP_code[freqcount*ORIGSIZE];	
@@ -162,15 +161,16 @@ int main(int argc, char *argv[])
      
     PP_code *Node_list = new PP_code[freqcount*ORIGSIZE + listlength*LISTSIZE];
     memcpy(Node_list, NList, freqcount*ORIGSIZE*sizeof(PP_code));
- 
+    /*
     int mxlen = 0;
     for (int i = 0; i < freqcount; i++) {
         if(Node_list[i*ORIGSIZE].count > mxlen)
             mxlen = Node_list[i*ORIGSIZE].count;
     }
     printf("mxlen=%d\n",mxlen);
+    */
     totalcount = freqcount;
-    printf("freqcount=%d\n",freqcount);
+    //printf("freqcount=%d\n",freqcount);
     
     listaddr[0] = freqcount * ORIGSIZE;
     for (int i = freqcount - 1; i > 0; i--) {
