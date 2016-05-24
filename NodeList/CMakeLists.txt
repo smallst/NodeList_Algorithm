@@ -3,7 +3,7 @@ project(cpp)
 
 set(CMAKE_CXX_COMPILER "g++")
 set(CMAKE_CXX_FLAGS "-fPIC -g -Wall -std=c++11")
-set(CMAKE_CXX_FLAGS_RELEASE "-fPIC -Wall -std=c++11 -O3")
+#set(CMAKE_CXX_FLAGS_RELEASE "-fPIC -Wall -std=c++11 -O3")
 ## if you use opencv,uncomment next line
 # find_package(OpenCV REQUIRED)
 

@@ -2,168 +2,18 @@
 #include <stdio.h>
 #include <cstring>
 #include <algorithm>
+#include <stdlib.h>
 #include "../include/ppc_tree.hpp"
 
+
 const int LISTSIZE = 800;
-int ORIGSIZE = 2200;
+int ORIGSIZE = 2800;
 int threshold = 0; 
 bool LLOG = false;
-/*
+int totalcount = 0;
+int freqcount;
 
 void printNode_List(PP_code *list, int i);
-
-int PPC_tree::freqcount;
-PPC_tree::~PPC_tree(){
-    if(child != NULL){
-        for (int i =0; i < freqcount; i++) {
-            if(child[i] != NULL)
-                delete child[i];
-            child[i] = NULL;
-        }
-        delete[] child;
-    }
-}
-
-void PPC_tree::deleteTree(){
-    for (int i = 0; i < freqcount; i++) {
-        if(child[i] != NULL)
-        {
-            child[i]->deleteTree();
-            delete child[i];
-        }
-    }
-    if(child != NULL)
-    {
-        delete[] child;
-        child =NULL;
-    }
-}
-void PPC_tree::buildTree(const char* fileName,double thresh){
-
-    int freqdict[1000];
-    FILE *stream;
-    char line[200];
-    stream = fopen(fileName,"r");
-    int **database = new int *[400000];
-    for (int i = 0; i < 400000; i++) {
-        database[i] = new int [100];
-    }
-    int linecount = 0;
-    while(fgets(line, 200, stream)){
-        int  count = 0;
-        for (int i=0; line[i] != '\0'; i++) {
-            int num = 0;
-            while(line[i] != ' ' && line[i] != '\n' &&line[i] !='\0'){
-                num = num * 10 + line[i] -'0';
-                i++;
-            }
-            if(num != 0)
-                database[linecount][++count] = num;
-        }
-        database[linecount++][0] = count + 1;
-    }
-    
-    printf("=============================database===========\n");
-    for (int i = 0; i< linecount; i++) {
-        for (int j = 1; j < database[i][0]; j++) {
-            printf("%d,",database[i][j]);
-        }
-        printf("\n");
-        
-    }
-    printf("===============================================\n");
-    /
-    dictionary *dict = new dictionary[1000];
-    for (int i = 0; i < 1000; i++) {
-        dict[i].key = i;
-        dict[i].num = 0;
-        freqdict[i] = -1;
-    }
-    for (int i = 0; i < linecount; i++) {
-        for (int j  = 1; j < database[i][0]; j ++) {
-            dict[database[i][j]].num ++;
-        }
-    }
-    std::sort(dict, dict+1000, std::greater<dictionary>());
-    
-    for (int i = 0; dict[i].num > 0; i++) {
-        printf("%d:%d,",dict[i].key,dict[i].num);
-        
-    }
-    printf("\n");
-    /
-    int tfreqcount = 0;
-    threshold = linecount * thresh;
-    printf("%d\n",threshold);
-    
-    for (int i = 0; dict[i].num >= threshold; i++) {
-        freqdict[dict[i].key] = i;
-        tfreqcount ++;
-    }
-    
-    printf("%d\n",tfreqcount);
-    freqcount = tfreqcount;
-    for (int i = 0; i < linecount; i++) {
-        int l = 0;
-        for (int j  = 1; j < database[i][0]; j ++) {
-            if(freqdict[database[i][j]] != -1)
-                database[i][++l] = database[i][j];
-        }
-        database[i][0] = l+1;
-    }
-    for (int i = 0; i < linecount; i++) {
-        std::sort(&database[i][1], &database[i][0]+database[i][0], [freqdict](int a,int b){return freqdict[a] < freqdict[b];});
-    }
-
-    child = new PPC_tree*[freqcount];
-    for (int i = 0; i < linecount; i++) {
-        PPC_tree * temp = this;
-        for (int j = 1; j < database[i][0]; j++) {
-            //printf(":%c",'A'-1+database[i][j]);
-            if(temp->child[freqdict[database[i][j]]] == NULL)
-                temp->child[freqdict[database[i][j]]] = new PPC_tree(freqcount);
-            temp = temp->child[freqdict[database[i][j]]];
-            temp->value = database[i][j];
-            temp->node.count ++;
-        }
-    }
-    int pre = 1, post = 1;
-    traverseWithMark(pre, post);
-    delete[] dict;
-    for (int i = 0; i < 400000; i++) {
-        delete[] database[i];
-    }
-    delete[] database;
-}
-void PPC_tree::printTree(){
-    printf("%d<(%d,%d):%d>\n", value,node.order_pre,node.order_post,node.count);
-    for (int i = 0; i < freqcount; i++) {
-        if(child[i] != NULL){
-            child[i]->printTree();
-        }
-    }
-}
-void PPC_tree::buildList(PP_code *nlist){
-    for (int i = 0; i < freqcount; i++) {
-        if(child[i] != NULL)
-        {
-            int index = i * ORIGSIZE;
-            nlist[index + nlist[index].count] = child[i]->node;
-            nlist[index].count++;
-            child[i] -> buildList(nlist);
-        }
-    }
-}
-void PPC_tree::traverseWithMark(int &pre, int &post){
-    node.order_pre = pre++;
-    for (int i = 0; i < freqcount; i++) {
-        if(child[i] != NULL)
-            child[i] -> traverseWithMark(pre, post);
-    }
-    node.order_post = post++;
-}
-*/
-int totalcount = 0;
 int mergeNList(PP_code *nlist, long begina, long beginb, int dest, long addrdict[]){
     long enda = begina + nlist[begina].count ;
     long endb = beginb + nlist[beginb].count ;
@@ -179,7 +29,7 @@ int mergeNList(PP_code *nlist, long begina, long beginb, int dest, long addrdict
                 {
                     int index = begind + nlist[begind].count;
                     if(nlist[index-1].order_pre == nlist[i].order_pre
-                        && nlist[index-1].order_post == nlist[i].order_post)
+                       && nlist[index-1].order_post == nlist[i].order_post)
                         nlist[index-1].count += nlist[j].count;
                     else
                     {
@@ -187,7 +37,7 @@ int mergeNList(PP_code *nlist, long begina, long beginb, int dest, long addrdict
                         nlist[index].order_pre = nlist[i].order_pre;
                         nlist[index].count = nlist[j].count;
                         nlist[begind].count++;
-                     }
+                    }
                     j++;
                 }
                 else
@@ -235,27 +85,25 @@ void DataMining(PP_code *nlist, long addrdict[], int begin, int end){
 }
 void Mining(PP_code *nlist, long addrdict[], int bbegin, int eend){
     int begin = bbegin, end = eend;
-    int *mystack = new int [eend - bbegin+2];
+    int *mystack = new int [eend - bbegin+20];
     int len = 1;
     mystack[0] = begin;
     for (int i = eend - 1; i > bbegin ; i --) {
         mystack[len ++] = end;
         while(len > 1){
-            
             int jb = begin, je = end -1;
             int dest  =end;
             while (je - jb > 0) {
                 for (int j = jb; j < je; j ++) {
                     dest = mergeNList(nlist, addrdict[j], addrdict[je], dest, addrdict);
                 }
-            
-            if(nlist[addrdict[je]].count == 2){
-                int n = dest - end;
-                totalcount += (1<<n) - n - 1;
-
-                break;
+                if(nlist[addrdict[je]].count == 2){
+                    int n = dest - end;
+                    totalcount += (1<<n) - n - 1;
+                    len ++;
+                    break;
                 }
-             else
+                else
                 {
                     begin = end;
                     end = dest;
@@ -273,11 +121,9 @@ void Mining(PP_code *nlist, long addrdict[], int bbegin, int eend){
                 begin = mystack[len -2];
                 end = mystack[len-1];
             }
-//        begin = bbegin, end = eend;
         }
     }
     delete[] mystack;
-    
 }
 void printNode_List(PP_code *list, int i){
     int index = i;
@@ -289,13 +135,23 @@ void printNode_List(PP_code *list, int i){
     printf("\n");
 }
 
-int freqcount;
 int main(int argc, char *argv[])
 {
+    if(argc < 3)
+    {
+        printf("usage: datamining filepath threshold\n");
+        return 0;
+    }
+
+    const char * filepath = argv[1];
+    double thresh = atof(argv[2]);
+    
     PPC_Tree *root = new PPC_Tree();
     int freqdict[1000];
-    root->buildTree("../data/T10I4D100K.dat",0.001,freqdict);
-   	PP_code *NList = new PP_code[freqcount*ORIGSIZE];	
+    //root->buildTree("../data/T10I4D100K.dat",0.001,freqdict);
+    root->buildTree(filepath, thresh, freqdict);
+    
+    PP_code *NList = new PP_code[freqcount*ORIGSIZE];	
     int listlength = freqcount * (freqcount-1) / 2;
     for (long long i = 0; i < freqcount; i++) {
         NList[i*ORIGSIZE] = PP_code(1);
@@ -303,7 +159,6 @@ int main(int argc, char *argv[])
     root->buildList(NList, freqdict);
     
     long *listaddr = new long[listlength];
-    // root->printTree();
      
     PP_code *Node_list = new PP_code[freqcount*ORIGSIZE + listlength*LISTSIZE];
     memcpy(Node_list, NList, freqcount*ORIGSIZE*sizeof(PP_code));
@@ -311,15 +166,12 @@ int main(int argc, char *argv[])
     int mxlen = 0;
     for (int i = 0; i < freqcount; i++) {
         if(Node_list[i*ORIGSIZE].count > mxlen)
-           mxlen = Node_list[i*ORIGSIZE].count;
-        if(LLOG)
-            ;
-        
-            // printNode_List(Node_list,i*ORIGSIZE);
+            mxlen = Node_list[i*ORIGSIZE].count;
     }
     printf("mxlen=%d\n",mxlen);
-    
     totalcount = freqcount;
+    printf("freqcount=%d\n",freqcount);
+    
     listaddr[0] = freqcount * ORIGSIZE;
     for (int i = freqcount - 1; i > 0; i--) {
         int dest = 0;
@@ -334,48 +186,5 @@ int main(int argc, char *argv[])
     delete[] NList;
     delete root;
     
-    /*
-    PPC_tree *root = new PPC_tree();
-    double thresh = 0.2;
-    //double thresh =0.001 * (argv[1][0]-'0');
-    
-    root->buildTree("../data/accidents.dat", thresh);
-    int listlength = PPC_tree::freqcount * (PPC_tree::freqcount-1) / 2;
-   	PP_code *Nde_list = new PP_code[PPC_tree::freqcount*ORIGSIZE/CODESIZE];	
-    long *listaddr = new long[listlength];
-    
-printf("list build\n");
-    for (long long i = 0; i < PPC_tree::freqcount; i++) {
-        Nde_list[i*ORIGSIZE] = PP_code(1);
-    }
-    root->buildList(Nde_list);
-       root->deleteTree();
-       //delete root;
-    
-    PP_code *Node_list = new PP_code[PPC_tree::freqcount*ORIGSIZE + listlength*LISTSIZE];
-    memcpy(Node_list, Nde_list, PPC_tree::freqcount*ORIGSIZE*sizeof(PP_code));
- 
-    int mxlen = 0;
-    for (int i = 0; i < PPC_tree::freqcount; i++) {
-        if(Node_list[i*ORIGSIZE].count > mxlen)
-           mxlen = Node_list[i*ORIGSIZE].count;
-        if(LLOG)
-            printNode_List(Node_list,i*ORIGSIZE);
-    }
-    printf("mxlen=%d\n",mxlen);
-    
-    totalcount = PPC_tree::freqcount;
-    listaddr[0] = PPC_tree::freqcount * ORIGSIZE;
-    for (int i = PPC_tree::freqcount - 1; i > 0; i--) {
-        int dest = 0;
-        for (int j = 0 ; j < i; j++) {
-            dest = mergeNList(Node_list, j*ORIGSIZE, i*ORIGSIZE, dest, listaddr);
-        }
-        Mining(Node_list, listaddr, 0, dest);
-    }
-    printf("total:%d\n", totalcount);
-    delete[] Node_list;
-    delete[] listaddr;
-    */
     return 0;
 }
