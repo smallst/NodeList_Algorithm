@@ -2,3 +2,4 @@ NodeList/build/*
 NodeList/GPATH 
 NodeList/GRTAGS 
 NodeList/GTAGS
+NodeList/data/*.txt

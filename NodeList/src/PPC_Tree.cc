@@ -7,8 +7,11 @@
 
 extern int threshold;
 extern int freqcount;
+extern int* FreqDict;
+extern bool LLOG;
 extern int ORIGSIZE;
 
+// for sort
 struct dictionary{
     int key;
     int num;
@@ -22,6 +25,7 @@ PPC_Tree::~PPC_Tree(){
     if(next != NULL)
         delete next;
 }
+// build tree with database
 void PPC_Tree::buildTree(const char* fileName, double thresh, int freqdict[]){
     FILE* stream;
     char line[200];
@@ -33,6 +37,7 @@ void PPC_Tree::buildTree(const char* fileName, double thresh, int freqdict[]){
         dict[i].num = 0;
         freqdict[i] = -1;
     }
+    // first, count freq
     stream = fopen(fileName,"r");
     while(fgets(line, 200, stream)){
         for (int i = 0; line[i] != '\0'; i++) {
@@ -47,6 +52,7 @@ void PPC_Tree::buildTree(const char* fileName, double thresh, int freqdict[]){
         linecount++;
     }
     fclose(stream);
+    // sort freq
     std::sort(dict, dict+1000, std::greater<dictionary>());
 
     int ffreqcount = 0;
@@ -56,6 +62,13 @@ void PPC_Tree::buildTree(const char* fileName, double thresh, int freqdict[]){
         ffreqcount ++;
     }
     freqcount = ffreqcount;
+    if(LLOG){
+        FreqDict = new int [(freqcount+1)*freqcount];
+        for (int i = 0; i < freqcount; i++) {
+            FreqDict[(i<<1)+1] = dict[i].key;
+        }
+    }
+    // second, build lcrs tree
     stream = fopen(fileName, "r");
     int sortline[100];
     while(fgets(line, 200, stream)){
@@ -96,9 +109,10 @@ void PPC_Tree::buildTree(const char* fileName, double thresh, int freqdict[]){
             }
         }
     }
-
+    // mark pre & post order
     traverseWithMark();
 }
+// non-recursion traverse
 void PPC_Tree::traverseWithMark(){
     int pre = 1,post = 1;
     PPC_Tree *temp = this;
@@ -127,6 +141,7 @@ void PPC_Tree::traverseWithMark(){
             break;
     }
 }
+// non-recursion print tree, for test
 void PPC_Tree::printTree(){
     PPC_Tree *temp = this;
     while(true){
@@ -152,6 +167,7 @@ void PPC_Tree::printTree(){
     }
     printf("\n");
 }
+// build 1-itemset Nlist
 void PPC_Tree::buildList(PP_code *nlist, int freqdict[]){
     PPC_Tree *temp = this->child;
     int index = 0;
