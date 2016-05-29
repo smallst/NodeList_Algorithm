@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <stdlib.h>
 #include <time.h>
+#include <regex.h>
 #include "../include/ppc_tree.hpp"
 
 
@@ -212,7 +213,16 @@ int main(int argc, char *argv[])
     
     const char * filepath = argv[1];
     double thresh = atof(argv[2]);
-    
+    regex_t reg;
+    regmatch_t pm[1];
+    if(!regcomp(&reg, "accidents\.dat",REG_EXTENDED))
+    {
+        if(!regexec(&reg,filepath,1,pm,0)){
+            ORIGSIZE = 80000;
+            //printf("change ORIGSIZE\n");
+        }
+        regfree(&reg);
+    }
     PPC_Tree *root = new PPC_Tree();
     int freqdict[1000];
 

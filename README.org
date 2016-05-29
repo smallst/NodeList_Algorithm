@@ -1,0 +1,12 @@
+PrePost Algorithm 
+C++
+
+usage:
+#+BEGIN_SRC bash
+cd NodeList
+mkdir -p build
+cd build
+cmake .. && make
+./cpptest DATAPATH THRESHOLD ['T' FOR LOG TO FILE]
+
+#+END_SRC
